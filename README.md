@@ -49,4 +49,4 @@ Watch the project in action: [Forward Parking Proximity Scanner Demo](https://yo
 -Serial communication and debugging
 
 ## Circuit Closeup
-![Circuit](images/circuit-closeup/circuit-closeup.jpeg)
+![Circuit](images/circuit-closeup.jpeg)
