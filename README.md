@@ -48,8 +48,5 @@ Watch the project in action: [Forward Parking Proximity Scanner Demo](https://yo
 -millis() for timing control
 -Serial communication and debugging
 
-## Project Images
-
-## Finished Build
-
 ## Circuit Closeup
+![Circuit](images/circuit-closeup/circuit-closeup.jpeg)
