@@ -1,0 +1,213 @@
+#include <Servo.h>
+
+// Tracks the last time the buzzer state changed.
+// unsigned long is used because millis() returns an unsigned long value.
+unsigned long previousMillis = 0;
+
+// Tracks whether the buzzer is currently on or off.
+bool buzzerState = false;
+
+
+// -------------------- Ultrasonic Sensor --------------------
+int trig = 5;
+int echo = 6;
+long duration;
+float distance;
+
+
+// -------------------- Passive Buzzer --------------------
+int buzzer = 3;
+
+
+// -------------------- Potentiometer --------------------
+int pot = A1;
+int value;
+int angle;
+
+
+// -------------------- RGB LED --------------------
+int r = 9;
+int g = 10;
+int b = 11;
+
+
+// -------------------- Status LEDs --------------------
+int greenLED = 7;
+int yellowLED = 13;
+int redLED = 4;
+
+
+// -------------------- Servo --------------------
+Servo jayServo;
+
+
+void setup() {
+
+  // Initialize serial communication for distance monitoring.
+  Serial.begin(9600);
+
+  // Attach the servo to digital pin 2.
+  jayServo.attach(2);
+
+  // Configure ultrasonic sensor pins.
+  pinMode(trig, OUTPUT);
+  pinMode(echo, INPUT);
+
+  // Configure status LED pins as outputs.
+  pinMode(greenLED, OUTPUT);
+  pinMode(yellowLED, OUTPUT);
+  pinMode(redLED, OUTPUT);
+
+  // Configure RGB LED pins as outputs.
+  pinMode(r, OUTPUT);
+  pinMode(g, OUTPUT);
+  pinMode(b, OUTPUT);
+
+  // Configure the passive buzzer as an output.
+  pinMode(buzzer, OUTPUT);
+}
+
+
+void loop() {
+
+  // -------------------- Potentiometer / Servo Control --------------------
+
+  // Read the potentiometer's analog voltage (0–1023).
+  value = analogRead(pot);
+
+  // Map the potentiometer reading to the servo's 0–180° range.
+  angle = map(value, 0, 1023, 0, 180);
+
+  // Move the servo to the corresponding angle.
+  jayServo.write(angle);
+
+
+  // -------------------- Ultrasonic Distance Measurement --------------------
+
+  // Send a short trigger pulse to initiate an ultrasonic measurement.
+  digitalWrite(trig, LOW);
+  delayMicroseconds(2);
+
+  digitalWrite(trig, HIGH);
+  delayMicroseconds(10);
+
+  digitalWrite(trig, LOW);
+
+  // Measure the duration of the returning echo pulse.
+  // Timeout is 30,000 microseconds (30 ms).
+  duration = pulseIn(echo, HIGH, 30000);
+
+  // Convert echo duration to an approximate distance in centimeters.
+  distance = duration * 0.017;
+
+  // Display the measured distance in the Serial Monitor.
+  Serial.println(distance);
+
+
+  // Stores the delay between buzzer state changes.
+  // A value of 0 means the buzzer should remain off.
+  unsigned long beepInterval = 0;
+
+
+  // -------------------- Distance-Based Alert System --------------------
+
+  if (distance > 55) {
+
+    // Object is outside the alert range: disable the buzzer.
+    noTone(buzzer);
+    buzzerState = false;
+
+    // Display the normal/clear status using the RGB LED.
+    digitalWrite(r, HIGH);
+    digitalWrite(g, LOW);
+    digitalWrite(b, HIGH);
+
+    // Turn off all status LEDs.
+    digitalWrite(greenLED, LOW);
+    digitalWrite(yellowLED, LOW);
+    digitalWrite(redLED, LOW);
+  }
+
+
+  else if (distance > 35) {
+
+    // Object is within the first warning range.
+    digitalWrite(greenLED, HIGH);
+
+    // Keep other LEDs off.
+    digitalWrite(yellowLED, LOW);
+    digitalWrite(redLED, LOW);
+
+    digitalWrite(r, LOW);
+    digitalWrite(g, LOW);
+    digitalWrite(b, LOW);
+
+    // Toggle the buzzer every 850 ms.
+    beepInterval = 850;
+  }
+
+
+  else if (distance > 13) {
+
+    // Object is within the second warning range.
+    digitalWrite(yellowLED, HIGH);
+
+    // Keep other LEDs off.
+    digitalWrite(greenLED, LOW);
+    digitalWrite(redLED, LOW);
+
+    digitalWrite(r, LOW);
+    digitalWrite(g, LOW);
+    digitalWrite(b, LOW);
+
+    // Toggle the buzzer every 350 ms.
+    beepInterval = 350;
+  }
+
+
+  else if (distance > 0) {
+
+    // Object is within the closest warning range.
+    digitalWrite(redLED, HIGH);
+
+    // Keep other LEDs off.
+    digitalWrite(greenLED, LOW);
+    digitalWrite(yellowLED, LOW);
+
+    digitalWrite(r, LOW);
+    digitalWrite(g, LOW);
+    digitalWrite(b, LOW);
+
+    // Toggle the buzzer every 200 ms for the fastest alert.
+    beepInterval = 200;
+  }
+
+
+  // -------------------- Non-Blocking Buzzer Control --------------------
+
+  // Only run the buzzer timing logic when an alert interval is active.
+  if (beepInterval > 0) {
+
+    // Check whether the configured interval has elapsed.
+    // millis() allows timing without blocking the rest of the program with delay().
+    if (millis() - previousMillis >= beepInterval) {
+
+      // Record the current time as the latest buzzer state change.
+      previousMillis = millis();
+
+      // Toggle the buzzer between on and off.
+      buzzerState = !buzzerState;
+
+      if (buzzerState) {
+
+        // Turn the passive buzzer on at 815 Hz.
+        tone(buzzer, 815);
+      }
+      else {
+
+        // Turn the buzzer off.
+        noTone(buzzer);
+      }
+    }
+  }
+}
