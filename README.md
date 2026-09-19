@@ -3,7 +3,7 @@ Arduino-based proximity detection and alert system with a servo controlled by a 
 
 ## Demo Video
 
-Watch the project in action:
+Watch the project in action: [Forward Parking Proximity Scanner Demo](https://youtube.com/shorts/yBNWycz9pFc?feature=share)
 
 ## Features
 - Potentiometer control of servo motor position
