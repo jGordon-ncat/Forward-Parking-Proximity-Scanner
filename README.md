@@ -50,3 +50,4 @@ Watch the project in action: [Forward Parking Proximity Scanner Demo](https://yo
 
 ## Circuit Closeup
 ![Circuit](images/final-setup/circuit-closeup.jpeg)
+This prototype demonstrates the core functionality of the Forward Parking Proximity Scanner. The ultrasonic sensor detects objects at varying distances and provides visual and audible feedback based on proximity. The system has been tested as a standalone circuit and successfully demonstrates the intended sensing, servo positioning, LED indication, and buzzer alert behavior. 
